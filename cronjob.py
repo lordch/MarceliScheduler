@@ -8,4 +8,3 @@ scheduler = BlockingScheduler()
 scheduler.add_job(test_job, "interval", seconds=30)
 
 scheduler.start()
-
