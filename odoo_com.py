@@ -1,5 +1,8 @@
 import xmlrpc.client
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 url = os.environ.get("ODOO_URL")
 db = os.environ.get("ODOO_DB")

@@ -1,7 +1,9 @@
 import datetime
 import os
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 
 FAKTUROWNIA_TOKEN = os.environ.get("FAKTUROWNIA_TOKEN")
 FAKTUROWNIA_ENDPOINT = os.environ.get("FAKTUROWNIA_ENDPOINT")
