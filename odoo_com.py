@@ -67,40 +67,19 @@ class OdooTalker:
         )
 
     def get_estimates(self, estimates):
-        last_index = next(
-            (
-                index
-                for index, estimate in enumerate(estimates)
-                if estimate["fields"]["x_numer"] == self.last_order_num
-            ),
-            None,
-        )
-        print(last_index)
-        # print(estimates[last_index]['fields']['x_numer'])
-        self.estimates = estimates[:last_index]
+        self.estimates = estimates
         for num, estimate in enumerate(self.estimates):
-            print(f"{num}. {estimate}")
+            print(
+                f"{num}. {estimate['fields']['x_data_wystawienia_tekst']} - {estimate['fields']['x_numer']}"
+            )
 
     def get_invoices(self, invoices):
         self.invoices = invoices
-        last_day_invoices = self.models.execute_kw(
-            db,
-            self.uid,
-            password,
-            "x_faktura_sprzedazowa",
-            "search_read",
-            [[["x_data_wystawienia", "=", self.last_invoice_date]]],
-            {"fields": ["x_name"]},
-        )
         print(len(self.invoices))
-        last_day_invoice_numbers = [invoice["x_name"] for invoice in last_day_invoices]
-        # print(last_day_invoice_numbers)
-        self.invoices = [
-            invoice
-            for invoice in self.invoices
-            if invoice["fields"]["x_name"] not in last_day_invoice_numbers
-        ]
-        print(len(self.invoices))
+        for num, invoice in enumerate(self.invoices):
+            print(
+                f"{num}. {invoice['fields']['x_data_wystawienia_tekst']} - {invoice['fields']['x_name']}"
+            )
 
     def upload_estimates(self):
         for estimate in self.estimates[::-1]:

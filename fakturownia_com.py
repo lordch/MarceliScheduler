@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import os
 import requests
 from dotenv import load_dotenv
@@ -51,6 +51,22 @@ estimate_position_parameters = {
 }
 
 
+def format_date(date: datetime):
+    return date.strftime("%Y-%m-%d")
+
+
+def today():
+    return format_date(datetime.today())
+
+
+def yesterday():
+    return format_date(datetime.today() - timedelta(days=1))
+
+
+def starting_date():
+    return format_date(datetime.today() - timedelta(days=14))
+
+
 class FaktTalker:
     def __init__(self):
         self.document_list = None
@@ -58,17 +74,34 @@ class FaktTalker:
         self.invoices = None
         self.parameters = FAKTUROWNIA_PARAMETERS
 
-    def get_documents(self, date):
-        print(f"Getting documents since {date}")
-        self.parameters["date_from"] = date
-        self.parameters["date_to"] = datetime.datetime.today().strftime("%Y-%m-%d")
+    def get_documents(self):
+        start = starting_date()
+        print(f"Getting documents since {start}")
+        self.parameters["date_from"] = start
+        self.parameters["date_to"] = today()
         print(self.parameters["date_from"])
         print(self.parameters["date_to"])
         response = requests.get(FAKTUROWNIA_ENDPOINT, self.parameters)
         self.document_list = response.json()
         print(len(self.document_list))
+        self.get_yesterdays_docs()
         self.categorize_docs()
         # print(self.parameters['date_to'])
+
+    def get_yesterdays_docs(self):
+        initial_list = self.document_list
+        yesterdays_list = []
+        yester = yesterday()
+        print(yesterday)
+        for doc in initial_list:
+            date = doc["created_at"].split("T")[0]
+            print(date)
+            if date == yester:
+                print("Aha! Appendin")
+                yesterdays_list.append(doc)
+            else:
+                print("nah, ain't appendin")
+        self.document_list = yesterdays_list
 
     def categorize_docs(self):
         types = ["vat", "final", "export_products", "correction", "receipt", "wdt"]
@@ -78,7 +111,6 @@ class FaktTalker:
         ]
         print(f"liczba zamowien: {len(self.estimates)}")
         self.invoices = [doc for doc in self.document_list if doc["kind"] in types]
-        print(self.invoices[0])
 
     def print_docs(self):
         for num, doc in enumerate(self.document_list):

@@ -25,8 +25,8 @@ def synchronize_dbs():
 
     ft.prepare_estimates()
     ot.get_estimates(ft.estimates_to_odoo)
-    ot.upload_estimates()
+    # ot.upload_estimates()
 
     ft.prepare_invoices()
     ot.get_invoices(ft.invoices_to_odoo)
-    ot.upload_invoices()
+    # ot.upload_invoices()
