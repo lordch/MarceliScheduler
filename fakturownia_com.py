@@ -116,7 +116,7 @@ class FaktTalker:
                 fields_dict["x_wartosc_netto_pln"]
             )
             fields_dict["x_wartosc_netto_pln"] *= ex_rate
-            num = estimate["number"].split("ZAM ")[1]
+            num = estimate["number"].replace("ZAM ", "")
             positions = []
             for item in estimate["positions"]:
                 position_dict = {
