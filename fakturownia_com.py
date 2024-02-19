@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
 import os
 import requests
 from dotenv import load_dotenv
+
+from utils import two_weeks_ago, today, yesterday
 
 load_dotenv()
 
@@ -51,22 +52,6 @@ estimate_position_parameters = {
 }
 
 
-def format_date(date: datetime):
-    return date.strftime("%Y-%m-%d")
-
-
-def today():
-    return format_date(datetime.today())
-
-
-def yesterday():
-    return format_date(datetime.today() - timedelta(days=1))
-
-
-def starting_date():
-    return format_date(datetime.today() - timedelta(days=14))
-
-
 class FaktTalker:
     def __init__(self):
         self.document_list = None
@@ -75,12 +60,15 @@ class FaktTalker:
         self.parameters = FAKTUROWNIA_PARAMETERS
 
     def get_documents(self):
-        start = starting_date()
+        """Get documents from Fakturownia API and store them in self.document_list"""
+
+        start = two_weeks_ago()
         print(f"Getting documents since {start}")
         self.parameters["date_from"] = start
         self.parameters["date_to"] = today()
         print(self.parameters["date_from"])
         print(self.parameters["date_to"])
+
         response = requests.get(FAKTUROWNIA_ENDPOINT, self.parameters)
         self.document_list = response.json()
         print(len(self.document_list))
