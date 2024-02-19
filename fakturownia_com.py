@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
 import os
 import requests
 from dotenv import load_dotenv
+
+from utils import two_weeks_ago, today, yesterday
 
 load_dotenv()
 
@@ -51,40 +52,40 @@ estimate_position_parameters = {
 }
 
 
-def format_date(date: datetime):
-    return date.strftime("%Y-%m-%d")
-
-
-def today():
-    return format_date(datetime.today())
-
-
-def yesterday():
-    return format_date(datetime.today() - timedelta(days=1))
-
-
-def starting_date():
-    return format_date(datetime.today() - timedelta(days=14))
-
-
 class FaktTalker:
     def __init__(self):
+        self.fetched_documents = None
         self.document_list = None
         self.estimates = None
         self.invoices = None
         self.parameters = FAKTUROWNIA_PARAMETERS
 
-    def get_documents(self):
-        start = starting_date()
-        print(f"Getting documents since {start}")
-        self.parameters["date_from"] = start
-        self.parameters["date_to"] = today()
+    def get_documents(self, start_date: str = two_weeks_ago(), end_date: str = today(), custom=False):
+        """Get documents from Fakturownia API, store them in self.document_list and categorize them.
+
+        At the moment, it fetches documents from the last two weeks and selects only those from yesterday.
+
+        Args:
+            start_date (str): date in format: YYYY-MM-DD. Example: 2021-12-31
+            end_date (str, optional): date in format: YYYY-MM-DD. Example: 2021-12-31. Defaults to today's date.
+            custom (bool, optional): If True, it fetches documents from the date range specified in start_date and end_date. Defaults to False.
+        Returns:
+            None
+        """
+
+        print(f"Getting documents since {start_date}")
+        self.parameters["date_from"] = start_date
+        self.parameters["date_to"] = end_date
         print(self.parameters["date_from"])
         print(self.parameters["date_to"])
+
         response = requests.get(FAKTUROWNIA_ENDPOINT, self.parameters)
-        self.document_list = response.json()
-        print(len(self.document_list))
-        self.get_yesterdays_docs()
+        self.fetched_documents = response.json()
+        print(len(self.fetched_documents))
+        if not custom:
+            self.get_yesterdays_docs()
+        else:
+            self.document_list = self.fetched_documents
         self.categorize_docs()
         # print(self.parameters['date_to'])
 
@@ -128,7 +129,7 @@ class FaktTalker:
                 fields_dict["x_wartosc_netto_pln"]
             )
             fields_dict["x_wartosc_netto_pln"] *= ex_rate
-            num = estimate["number"].split("ZAM ")[1]
+            num = estimate["number"].replace("ZAM ", "")
             positions = []
             for item in estimate["positions"]:
                 position_dict = {
