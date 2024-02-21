@@ -90,10 +90,10 @@ class FaktTalker:
         # print(self.parameters['date_to'])
 
     def get_yesterdays_docs(self):
-        initial_list = self.document_list
+        """Get documents from yesterday and store them in self.document_list"""
+        initial_list = self.fetched_documents
         yesterdays_list = []
         yester = yesterday()
-        print(yesterday)
         for doc in initial_list:
             date = doc["created_at"].split("T")[0]
             print(date)
@@ -105,6 +105,7 @@ class FaktTalker:
         self.document_list = yesterdays_list
 
     def categorize_docs(self):
+        """Categorize documents into estimates and invoices. Store them in self.estimates and self.invoices respectively."""
         types = ["vat", "final", "export_products", "correction", "receipt", "wdt"]
         print("Categorizing documents")
         self.estimates = [
@@ -118,6 +119,7 @@ class FaktTalker:
             print(f"{num}. date: {doc['issue_date']} = {doc['number']}")
 
     def prepare_estimates(self):
+        """Prepare estimates to upload to odoo. Store them in self.estimates_to_odoo."""
         print("Preparing estimates to upload to odoo")
         estimates_to_odoo = []
         for estimate in self.estimates:
